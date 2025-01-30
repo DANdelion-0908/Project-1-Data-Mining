@@ -1,30 +1,40 @@
 ---
-title: "Analisis Peliculas"
+title: "Análisis Películas"
 author: "Dan"
 date: "2025-01-29"
 output: word_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r Librerías}
+install.packages("lubridate")
+install.packages("dplyr")
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r cargar archivo, echo=FALSE}
+peliculas <- read.csv("movies.csv")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Top 10 películas con mayor presupuesto}
+top10 <- peliculas[order(-peliculas$budget),c('id','budget','originalTitle')]
+head(top10, 10)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r Película con la mayor cantidad de votos}
+maxVote <- peliculas[peliculas$voteCount==max(peliculas$voteCount), c('id','budget','originalTitle', 'voteCount')]
+```
+
+```{r Películas hechas por año}
+library(dplyr)
+library(lubridate)
+peliculas <- peliculas %>%
+  mutate(year = year(as.Date(releaseDate, format = "%Y-%m-%d")))
+
+moviesPerYear <- table(peliculas$year)
+
+barplot(moviesPerYear, 
+        main = "Cantidad de Películas Lanzadas por Año", 
+        xlab = "Año", 
+        ylab = "Cantidad de Películas", 
+        col = "skyblue", 
+        border = "black", 
+        las = 2)
+```
