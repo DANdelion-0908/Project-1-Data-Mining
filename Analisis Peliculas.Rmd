@@ -38,3 +38,14 @@ barplot(moviesPerYear,
         border = "black", 
         las = 2)
 ```
+
+```{r Género con las mayores ganancias}
+maxRevenue <- aggregate(peliculas$revenue, by = list(peliculas$genres), FUN = mean)
+colnames(maxRevenue) <- c("Género", "IngresosPromedio")
+maxRevenue <- maxRevenue[order(-maxRevenue$IngresosPromedio),]
+head(maxRevenue, 1)
+```
+
+```{r Relación entre popularidad y cantidad de hombres/mujeres}
+
+```
