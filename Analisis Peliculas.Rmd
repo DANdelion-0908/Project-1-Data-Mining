@@ -119,3 +119,29 @@ barplot(moviesPerMonthMean$ingresosPromedio,
         las = 2)
 
 ```
+
+```{r Estrategia de marketing más efectiva}
+library(dplyr)
+
+revenuePage <- peliculas %>% 
+  filter(!is.na(homePage)) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueNoPage <- peliculas %>% 
+  filter(is.na(homePage)) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+
+revenueVideo <- peliculas %>% 
+  filter(video == TRUE) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueNoVideo <- peliculas %>% 
+  filter(video == FALSE) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueData <- c(revenuePage$promedioIngresos, revenueNoPage$promedioIngresos, revenueVideo$promedioIngresos, revenueNoVideo$promedioIngresos)
+
+pie(revenueData, labels = c("Con página", "Sin página", "Con vídeo", "Sin vídeo"), col = rainbow(4))
+
+```
