@@ -7,10 +7,12 @@ output: word_document
 ```{r Librerías}
 install.packages("lubridate")
 install.packages("dplyr")
+install.packages("ggplot2")
 ```
 
 ```{r cargar archivo, echo=FALSE}
-peliculas <- read.csv("movies.csv")
+peliculas <- read.csv("movies.csv", fileEncoding = "latin1")
+
 ```
 
 ```{r Top 10 películas con mayor presupuesto}
@@ -47,5 +49,73 @@ head(maxRevenue, 1)
 ```
 
 ```{r Relación entre popularidad y cantidad de hombres/mujeres}
+library(ggplot2)
+peliculas$castMenAmount <- as.numeric(peliculas$castMenAmount)
+peliculas$castWomenAmount <- as.numeric(peliculas$castWomenAmount)
+peliculas$castMenAmount <- (gsub("[^0-9]", 0, peliculas$castMenAmount))
+peliculas$castWomenAmount <- (gsub("[^0-9]", 0, peliculas$castWomenAmount))
+peliculas$castMenAmount <- as.numeric(peliculas$castMenAmount)
+peliculas$castWomenAmount <- as.numeric(peliculas$castWomenAmount)
+
+ggplot(peliculas, aes(x = castMenAmount, y = popularity)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Popularidad vs. Cantidad de Actores Hombres",
+       x = "Número de Actores Hombres",
+       y = "Popularidad")
+
+ggplot(peliculas, aes(x = castWomenAmount, y = popularity)) +
+  geom_point(alpha = 0.5, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Popularidad vs. Cantidad de Actrices Mujeres",
+       x = "Número de Actrices Mujeres",
+       y = "Popularidad")
+
+cor(peliculas$castMenAmount, peliculas$popularity, use = "complete.obs")
+cor(peliculas$castWomenAmount, peliculas$popularity, use = "complete.obs")
+cor(peliculas$castMenAmount, peliculas$revenue, use = "complete.obs")
+cor(peliculas$castWomenAmount, peliculas$revenue, use = "complete.obs")
+```
+
+```{r Correlación entre presupuesto e ingresos}
+library(ggplot2)
+ggplot(peliculas, aes(x = budget, y = revenue)) +
+  geom_point(alpha = 0.5, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Presupuesto vs. Ingresos",
+       x = "Presupuesto",
+       y = "Ingresos")
+cor(peliculas$budget, peliculas$revenue, use = "complete.obs")
+```
+
+```{r Meses con mejores lanzamientos}
+library(dplyr)
+library(lubridate)
+
+peliculas <- peliculas %>%
+  mutate(month = month(as.Date(releaseDate, format = "%Y-%m-%d")))
+
+moviesPerMonth <- table(peliculas$month)
+
+moviesPerMonthMean <- peliculas %>%
+  group_by(month) %>%
+  summarise(ingresosPromedio = mean(revenue, na.rm = TRUE))
+
+barplot(moviesPerMonth, 
+        main = "Cantidad de Películas Lanzadas por Mes", 
+        xlab = "Mes", 
+        ylab = "Cantidad de Películas", 
+        col = "skyblue", 
+        border = "black", 
+        las = 2)
+
+barplot(moviesPerMonthMean$ingresosPromedio, 
+        names.arg = moviesPerMonthMean$month,
+        main = "Ingresos Promedio por Mes", 
+        xlab = "Mes", 
+        ylab = "Ingresos Promedio", 
+        col = "orange", 
+        border = "black", 
+        las = 2)
 
 ```
