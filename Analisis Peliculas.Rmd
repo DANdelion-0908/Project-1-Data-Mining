@@ -22,6 +22,8 @@ head(top10, 10)
 
 ```{r Película con la mayor cantidad de votos}
 maxVote <- peliculas[peliculas$voteCount==max(peliculas$voteCount), c('id','budget','originalTitle', 'voteCount')]
+
+maxVote
 ```
 
 ```{r Películas hechas por año}
@@ -143,5 +145,4 @@ revenueNoVideo <- peliculas %>%
 revenueData <- c(revenuePage$promedioIngresos, revenueNoPage$promedioIngresos, revenueVideo$promedioIngresos, revenueNoVideo$promedioIngresos)
 
 pie(revenueData, labels = c("Con página", "Sin página", "Con vídeo", "Sin vídeo"), col = rainbow(4))
-
 ```
