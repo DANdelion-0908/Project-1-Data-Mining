@@ -1,0 +1,41 @@
+---
+title: "Análisis de películas pares"
+author: "Ruth de Leon"
+date: "2025-01-30"
+output: word_document
+---
+
+## Ejercicio 2
+
+```{r}
+datos <- read.csv("C:/Users/Usuario/OneDrive/Documentos/Proyecto 1 - Mineria/movies.csv")
+tipos <- sapply(datos, class)
+
+clasificacion <- sapply(names(datos), function(var) {
+    tipo <- tipos[[var]]
+    
+    if (tipo %in% c("character", "factor")) {
+        if (var == "releaseDate") {
+            return("Cualitativa Ordinal")
+        } else {
+            return("Cualitativa Nominal")
+        }
+    } else if (tipo %in% c("integer", "numeric")) {
+        if (var %in% c("voteAvg", "revenue", "popularity")) {
+            return("Cuantitativa Continua") 
+        } else {
+            return("Cuantitativa Discreta") 
+        }
+    } else if (tipo == "logical") {
+        return("Cualitativa Nominal")  
+    } else {
+        return("Desconocido") 
+    }
+})
+
+clasificacion_variables <- data.frame(Variable = names(clasificacion), Tipo = clasificacion)
+print(clasificacion_variables)
+
+
+```
+
