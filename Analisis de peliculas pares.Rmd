@@ -60,7 +60,9 @@ top10Movies %>%
 
 
 
-## Ejercicio 4.6
+
+
+## Ejercicio 4.4
 
 ```{r}
 
@@ -78,6 +80,17 @@ kable(result_worst_movie, format = "html", escape = FALSE, align = "c") %>%
   row_spec(0, bold = TRUE, color = "white", background = "black") %>%
   add_header_above(c("Peor Película Según Voto Promedio" = 2)) %>%
   scroll_box(width = "100%", height = "300px")
+
+```
+
+
+
+
+## Ejercicio 4.6
+
+```{r}
+
+
 
 ```
 
