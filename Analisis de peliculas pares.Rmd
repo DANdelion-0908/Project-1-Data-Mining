@@ -35,7 +35,123 @@ clasificacion <- sapply(names(datos), function(var) {
 
 clasificacion_variables <- data.frame(Variable = names(clasificacion), Tipo = clasificacion)
 print(clasificacion_variables)
+invisible(datos)
 
 
 ```
+
+## Ejercicio 4.2
+
+```{r}
+library(knitr)
+library(kableExtra)
+
+top10Movies <- datos[order(-datos$revenue), c('id', 'revenue', 'originalTitle')]
+top10Movies <- head(top10Movies, 10)
+
+#Diseño
+top10Movies %>%
+  kable("html", caption = "Top 10 películas con más ingresos") %>%
+  kable_styling("striped", full_width = FALSE, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+
+
+```
+
+
+
+## Ejercicio 4.6
+
+```{r}
+
+worst_movie <- datos[which.min(datos$voteAvg), ]
+
+result_worst_movie <- data.frame(
+  Película = worst_movie$title,
+  Voto_Promedio = worst_movie$voteAvg
+)
+
+kable(result_worst_movie, format = "html", escape = FALSE, align = "c") %>%
+  kable_styling(full_width = TRUE, position = "center", font_size = 14) %>%
+  column_spec(1, bold = TRUE, color = "white", background = "darkred") %>%
+  column_spec(2, bold = TRUE, color = "white", background = "darkgreen") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "black") %>%
+  add_header_above(c("Peor Película Según Voto Promedio" = 2)) %>%
+  scroll_box(width = "100%", height = "300px")
+
+```
+
+
+
+
+
+
+## Ejercicio 4.8
+
+```{r}
+
+
+```
+
+
+
+
+
+## Ejercicio 4.10
+
+```{r}
+
+
+```
+
+
+
+
+## Ejercicio 4.12
+
+```{r}
+
+
+```
+
+
+
+
+## Ejercicio 4.14
+
+```{r}
+
+
+```
+
+
+
+
+## Ejercicio 4.16
+
+```{r}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
