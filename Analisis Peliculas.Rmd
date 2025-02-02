@@ -1,0 +1,219 @@
+---
+title: "Análisis Películas"
+author: "Dan"
+date: "2025-01-29"
+output: word_document
+---
+```{r Librerías}
+install.packages("lubridate")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("readr")
+```
+
+```{r cargar archivo, echo=FALSE}
+peliculas <- read.csv("movies.csv")
+```
+
+```{r Análisis cuantitativo y cualtitativo}
+library(ggplot2)
+
+library(ggplot2)
+
+# Variables cualitativas
+quant_vars <- c("budget", "revenue", "runtime", "popularity", "voteAvg", 
+                "voteCount", "genresAmount", "productionCoAmount", 
+                "productionCountriesAmount", "actorsAmount")
+
+for (var in quant_vars) {
+  print(ggplot(peliculas, aes_string(x = var)) +
+    geom_histogram(bins = 30, fill = "steelblue", color = "black", alpha = 0.7) +
+    ggtitle(paste("Histograma de", var)))
+}
+
+# Variables cuantitativas
+# Variables cualitativas a analizar
+qual_vars <- c("video", "originalLanguage")
+
+# Graficar la distribución de cada variable cualitativa
+for (var in qual_vars) {
+  print(ggplot(peliculas, aes_string(x = var)) +
+    geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotar etiquetas
+    ggtitle(paste("Distribución de", var)) +
+    xlab(var) + ylab("Frecuencia"))
+}
+```
+
+```{r Top 10 películas con mayor presupuesto}
+top10 <- peliculas[order(-peliculas$budget),c('id','budget','originalTitle')]
+head(top10, 10)
+```
+
+```{r Película con la mayor cantidad de votos}
+maxVote <- peliculas[peliculas$voteCount==max(peliculas$voteCount), c('id','budget','originalTitle', 'voteCount')]
+
+maxVote
+```
+
+```{r Películas hechas por año}
+library(dplyr)
+library(lubridate)
+peliculas <- peliculas %>%
+  mutate(year = year(as.Date(releaseDate, format = "%Y-%m-%d")))
+
+moviesPerYear <- table(peliculas$year)
+
+barplot(moviesPerYear, 
+        main = "Cantidad de Películas Lanzadas por Año", 
+        xlab = "Año", 
+        ylab = "Cantidad de Películas", 
+        col = "skyblue", 
+        border = "black", 
+        las = 2)
+```
+
+```{r Género con las mayores ganancias}
+maxRevenue <- aggregate(peliculas$revenue, by = list(peliculas$genres), FUN = mean)
+colnames(maxRevenue) <- c("Género", "IngresosPromedio")
+maxRevenue <- maxRevenue[order(-maxRevenue$IngresosPromedio),]
+head(maxRevenue, 1)
+```
+
+```{r Relación entre popularidad y cantidad de hombres/mujeres}
+library(ggplot2)
+peliculas$castMenAmount <- as.numeric(peliculas$castMenAmount)
+peliculas$castWomenAmount <- as.numeric(peliculas$castWomenAmount)
+peliculas$castMenAmount <- (gsub("[^0-9]", 0, peliculas$castMenAmount))
+peliculas$castWomenAmount <- (gsub("[^0-9]", 0, peliculas$castWomenAmount))
+peliculas$castMenAmount <- as.numeric(peliculas$castMenAmount)
+peliculas$castWomenAmount <- as.numeric(peliculas$castWomenAmount)
+
+ggplot(peliculas, aes(x = castMenAmount, y = popularity)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Popularidad vs. Cantidad de Actores Hombres",
+       x = "Número de Actores Hombres",
+       y = "Popularidad")
+
+ggplot(peliculas, aes(x = castWomenAmount, y = popularity)) +
+  geom_point(alpha = 0.5, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Popularidad vs. Cantidad de Actrices Mujeres",
+       x = "Número de Actrices Mujeres",
+       y = "Popularidad")
+
+cor(peliculas$castMenAmount, peliculas$popularity, use = "complete.obs")
+cor(peliculas$castWomenAmount, peliculas$popularity, use = "complete.obs")
+cor(peliculas$castMenAmount, peliculas$revenue, use = "complete.obs")
+cor(peliculas$castWomenAmount, peliculas$revenue, use = "complete.obs")
+```
+
+```{r Correlación entre presupuesto e ingresos}
+library(ggplot2)
+ggplot(peliculas, aes(x = budget, y = revenue)) +
+  geom_point(alpha = 0.5, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Presupuesto vs. Ingresos",
+       x = "Presupuesto",
+       y = "Ingresos")
+cor(peliculas$budget, peliculas$revenue, use = "complete.obs")
+```
+
+```{r Meses con mejores lanzamientos}
+library(dplyr)
+library(lubridate)
+
+peliculas <- peliculas %>%
+  mutate(month = month(as.Date(releaseDate, format = "%Y-%m-%d")))
+
+moviesPerMonth <- table(peliculas$month)
+
+moviesPerMonthMean <- peliculas %>%
+  group_by(month) %>%
+  summarise(ingresosPromedio = mean(revenue, na.rm = TRUE))
+
+barplot(moviesPerMonth, 
+        main = "Cantidad de Películas Lanzadas por Mes", 
+        xlab = "Mes", 
+        ylab = "Cantidad de Películas", 
+        col = "skyblue", 
+        border = "black", 
+        las = 2)
+
+barplot(moviesPerMonthMean$ingresosPromedio, 
+        names.arg = moviesPerMonthMean$month,
+        main = "Ingresos Promedio por Mes", 
+        xlab = "Mes", 
+        ylab = "Ingresos Promedio", 
+        col = "orange", 
+        border = "black", 
+        las = 2)
+
+cor(peliculas$month, peliculas$revenue, use = "complete.obs")
+```
+
+```{r Estrategia de marketing más efectiva}
+library(dplyr)
+
+revenuePage <- peliculas %>% 
+  filter(!is.na(homePage)) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueNoPage <- peliculas %>% 
+  filter(is.na(homePage)) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+
+revenueVideo <- peliculas %>% 
+  filter(video == TRUE) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueNoVideo <- peliculas %>% 
+  filter(video == FALSE) %>% 
+  summarise(promedioIngresos = mean(revenue, na.rm = TRUE))
+
+revenueData <- c(revenuePage$promedioIngresos, revenueNoPage$promedioIngresos, revenueVideo$promedioIngresos, revenueNoVideo$promedioIngresos)
+
+pie(revenueData, labels = c("Con página", "Sin página", "Con vídeo", "Sin vídeo"), col = rainbow(4))
+```
+
+```{r Película más antigua}
+library(dplyr)
+library(lubridate)
+peliculas <- peliculas %>%
+  mutate(year = year(as.Date(releaseDate, format = "%Y-%m-%d")))
+
+peliculas[peliculas$year == min(peliculas$year),c('title', 'budget', 'releaseDate')]
+```
+
+```{r Película más taquillera de la historia}
+peliculas[peliculas$revenue == max(peliculas$revenue),c('title', 'budget', 'revenue', 'director', 'releaseDate')]
+```
+
+```{r Top 10 productoras con la mayor cantidad de fracasos}
+library(dplyr)
+library(ggplot2)
+
+peliculas_perdida <- peliculas %>% 
+  filter(revenue < budget & !is.na(productionCompany))
+
+fracasos_por_productora <- peliculas_perdida %>%
+  group_by(productionCompany) %>%
+  summarise(total_perdidas = n()) %>%
+  arrange(desc(total_perdidas)) 
+
+head(fracasos_por_productora, 10)
+
+ggplot(head(fracasos_por_productora, 10), aes(x = reorder(productionCompany, total_perdidas), y = total_perdidas)) +
+  geom_bar(stat = "identity", fill = "red", color = "black") +
+  coord_flip() +
+  labs(title = "Top 10 Productoras con Más Películas en Pérdida",
+       x = "Productora",
+       y = "Cantidad de Películas en Pérdida") +
+  theme_minimal()
+```
+
+```{r Correlación entre ingresos y votos}
+cor(peliculas$revenue, peliculas$voteAvg, use = "complete.obs")
+```
