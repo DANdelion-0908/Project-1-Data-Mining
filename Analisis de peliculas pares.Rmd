@@ -322,6 +322,20 @@ ggplot(datos, aes(x = voteAvg, y = revenue)) +
 ```{r}
 
 
+correlacion_popularidad <- cor(datos$popularity, datos$revenue, use = "complete.obs")
+
+print(paste("El coeficiente de correlación entre popularidad y éxito comercial es:", correlacion_popularidad))
+
+ggplot(datos, aes(x = popularity, y = revenue)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(title = "Correlación entre Popularidad del Elenco y Éxito Comercial",
+       x = "Popularidad del Elenco",
+       y = "Ingresos") +
+  theme_minimal()
+
+
+
 ```
 
 
