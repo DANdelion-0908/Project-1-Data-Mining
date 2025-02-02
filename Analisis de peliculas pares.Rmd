@@ -86,27 +86,181 @@ kable(result_worst_movie, format = "html", escape = FALSE, align = "c") %>%
 
 
 
-## Ejercicio 4.6
+## Ejercicio 4.6 - Parte 1
 
 ```{r}
+library(dplyr)
+library(tidyr)
+library(kableExtra)
 
+datos$releaseDate <- as.Date(datos$releaseDate, format = "%Y-%m-%d")
+
+movies20_recent <- datos %>%
+  arrange(desc(releaseDate)) %>%
+  head(20)  
+
+movies20_recent <- movies20_recent %>%
+  separate_rows(genres, sep = "\\|") 
+
+genre_counts <- movies20_recent %>%
+  group_by(genres) %>%
+  summarise(Frecuencia = n()) %>%
+  arrange(desc(Frecuencia)) 
+
+
+genero_principal <- genre_counts$genres[1]
+
+kable(genre_counts, col.names = c("Género", "Frecuencia"), align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                full_width = FALSE, position = "center")
+
+cat("El género principal de las 20 películas más recientes es:", genero_principal)
 
 
 ```
 
 
 
-
-
-
-## Ejercicio 4.8
+## Ejercicio 4.6 - Parte 1
 
 ```{r}
+
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+
+datos$releaseDate <- as.Date(datos$releaseDate, format = "%Y-%m-%d")
+
+movies20_recent <- datos %>%
+  arrange(desc(releaseDate)) %>%
+  head(20)  
+
+movies20_recent <- movies20_recent %>%
+  separate_rows(genres, sep = "\\|") 
+
+genre_counts <- movies20_recent %>%
+  group_by(genres) %>%
+  summarise(Frecuencia = n()) %>%
+  arrange(desc(Frecuencia)) 
+
+
+genero_principal <- genre_counts$genres[1]
+
+kable(genre_counts, col.names = c("Género", "Frecuencia"), align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                full_width = FALSE, position = "center")
+
+cat("El género principal de las 20 películas más recientes es:", genero_principal)
+
+
+```
+
+## Ejercicio 4.6 - Parte 2
+
+```{r}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+generos_divididos <- unlist(strsplit(datos$genres, ","))
+generos_divididos <- trimws(generos_divididos)
+frecuencia_generos <- table(generos_divididos)
+genero_predominante <- names(frecuencia_generos)[which.max(frecuencia_generos)]
+
+genero_predominante_resultado <- data.frame(
+  Género = genero_predominante,
+  Frecuencia = max(frecuencia_generos)
+)
+
+kable(genero_predominante_resultado, format = "html", escape = FALSE, align = "c") %>%
+  kable_styling(full_width = TRUE, position = "center", font_size = 14) %>%
+  column_spec(1, bold = TRUE, color = "white", background = "purple") %>%
+  column_spec(2, bold = TRUE, color = "white", background = "darkblue") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "black") %>%
+  add_header_above(c("Género Predominante" = 2)) %>%
+  scroll_box(width = "100%", height = "300px")
+
+
 
 
 ```
 
 
+## Ejercicio 4.6 - Parte 3
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+peliculas_largas <- datos %>% arrange(desc(runtime)) %>% head(20)
+generos_largas <- unlist(strsplit(peliculas_largas$genres, ","))
+generos_largas <- trimws(generos_largas)
+frecuencia_generos_largas <- table(generos_largas)
+
+ggplot(as.data.frame(frecuencia_generos_largas), aes(x = reorder(generos_largas, -Freq), y = Freq)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  labs(title = "Género Principal de las 20 Películas Más Largas", x = "Género", y = "Frecuencia") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 12), 
+        axis.title = element_text(size = 14),
+        plot.title = element_text(size = 16, face = "bold")) +
+  coord_flip()
+
+
+```
+
+
+
+## Ejercicio 4.8 - Parte 1
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+datos$actorCount <- sapply(strsplit(datos$actors, ","), length)
+
+promedio_ingresos <- datos %>%
+  group_by(actorCount) %>%
+  summarise(AvgRevenue = mean(revenue, na.rm = TRUE))
+
+ggplot(promedio_ingresos, aes(x = as.factor(actorCount), y = AvgRevenue)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Promedio de Ingresos según la Cantidad de Actores",
+       x = "Número de Actores",
+       y = "Ingresos Promedio") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        plot.title = element_text(size = 14, face = "bold"))
+
+
+```
+
+
+
+## Ejercicio 4.8 - Parte 2
+
+```{r}
+
+datos$releaseYear <- as.numeric(substr(datos$releaseDate, 1, 4))
+
+actor_por_año <- datos %>%
+  group_by(releaseYear) %>%
+  summarise(AvgActors = mean(actorCount, na.rm = TRUE))
+
+ggplot(actor_por_año, aes(x = releaseYear, y = AvgActors)) +
+  geom_line(color = "purple", size = 1) +
+  geom_point(color = "black") +
+  labs(title = "Evolución del Número de Actores por Película",
+       x = "Año",
+       y = "Promedio de Actores") +
+  theme_minimal()
+
+
+```
 
 
 
