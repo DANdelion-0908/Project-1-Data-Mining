@@ -89,41 +89,6 @@ kable(result_worst_movie, format = "html", escape = FALSE, align = "c") %>%
 ## Ejercicio 4.6 - Parte 1
 
 ```{r}
-library(dplyr)
-library(tidyr)
-library(kableExtra)
-
-datos$releaseDate <- as.Date(datos$releaseDate, format = "%Y-%m-%d")
-
-movies20_recent <- datos %>%
-  arrange(desc(releaseDate)) %>%
-  head(20)  
-
-movies20_recent <- movies20_recent %>%
-  separate_rows(genres, sep = "\\|") 
-
-genre_counts <- movies20_recent %>%
-  group_by(genres) %>%
-  summarise(Frecuencia = n()) %>%
-  arrange(desc(Frecuencia)) 
-
-
-genero_principal <- genre_counts$genres[1]
-
-kable(genre_counts, col.names = c("Género", "Frecuencia"), align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
-                full_width = FALSE, position = "center")
-
-cat("El género principal de las 20 películas más recientes es:", genero_principal)
-
-
-```
-
-
-
-## Ejercicio 4.6 - Parte 1
-
-```{r}
 
 library(dplyr)
 library(tidyr)
@@ -154,6 +119,11 @@ cat("El género principal de las 20 películas más recientes es:", genero_princ
 
 
 ```
+
+
+
+
+
 
 ## Ejercicio 4.6 - Parte 2
 
@@ -268,8 +238,28 @@ ggplot(actor_por_año, aes(x = releaseYear, y = AvgActors)) +
 
 ```{r}
 
+library(dplyr)
+library(ggplot2)
+
+top_directores <- datos %>%
+  filter(!is.na(director) & director != "") %>% 
+  mutate(director = iconv(director, from = "latin1", to = "UTF-8")) %>% 
+  arrange(desc(voteAvg)) %>%
+  select(title, director, voteAvg) %>%
+  head(20)
+
+ggplot(top_directores, aes(x = reorder(director, voteAvg), y = voteAvg, fill = director)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Directores de las 20 Películas Mejor Calificadas",
+       x = "Director",
+       y = "Calificación Promedio") +
+  theme_minimal()
+
 
 ```
+
+
 
 
 
@@ -277,6 +267,27 @@ ggplot(actor_por_año, aes(x = releaseYear, y = AvgActors)) +
 ## Ejercicio 4.12
 
 ```{r}
+
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+datos$releaseDate <- as.Date(datos$releaseDate, format = "%Y-%m-%d")
+
+datos$releaseMonth <- month(datos$releaseDate, label = TRUE, abbr = FALSE)
+
+ingresos_por_mes <- datos %>%
+  group_by(releaseMonth) %>%
+  summarise(AvgRevenue = mean(revenue, na.rm = TRUE))
+
+ggplot(ingresos_por_mes, aes(x = reorder(releaseMonth, AvgRevenue), y = AvgRevenue, fill = releaseMonth)) +
+  geom_col(show.legend = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Ingresos Promedio según el Mes de Lanzamiento",
+       x = "Mes de Lanzamiento",
+       y = "Ingresos Promedio") +
+  theme_minimal()
+
 
 
 ```
@@ -287,6 +298,18 @@ ggplot(actor_por_año, aes(x = releaseYear, y = AvgActors)) +
 ## Ejercicio 4.14
 
 ```{r}
+
+correlacion <- cor(datos$voteAvg, datos$revenue, use = "complete.obs")
+
+print(paste("El coeficiente de correlación entre calificación y éxito comercial es:", correlacion))
+
+ggplot(datos, aes(x = voteAvg, y = revenue)) +
+  geom_point(alpha = 0.5, color = "green") +
+  geom_smooth(method = "lm", color = "darkblue", se = FALSE) +
+  labs(title = "Correlación entre Calificación y Éxito Comercial",
+       x = "Calificación Promedio",
+       y = "Ingresos") +
+  theme_minimal()
 
 
 ```
