@@ -58,10 +58,6 @@ top10Movies %>%
 
 ```
 
-
-
-
-
 ## Ejercicio 4.4
 
 ```{r}
@@ -82,9 +78,6 @@ kable(result_worst_movie, format = "html", escape = FALSE, align = "c") %>%
   scroll_box(width = "100%", height = "300px")
 
 ```
-
-
-
 
 ## Ejercicio 4.6 - Parte 1
 
@@ -120,11 +113,6 @@ cat("El género principal de las 20 películas más recientes es:", genero_princ
 
 ```
 
-
-
-
-
-
 ## Ejercicio 4.6 - Parte 2
 
 ```{r}
@@ -156,7 +144,6 @@ kable(genero_predominante_resultado, format = "html", escape = FALSE, align = "c
 
 ```
 
-
 ## Ejercicio 4.6 - Parte 3
 
 ```{r}
@@ -180,8 +167,6 @@ ggplot(as.data.frame(frecuencia_generos_largas), aes(x = reorder(generos_largas,
 
 
 ```
-
-
 
 ## Ejercicio 4.8 - Parte 1
 
@@ -209,8 +194,6 @@ ggplot(promedio_ingresos, aes(x = as.factor(actorCount), y = AvgRevenue)) +
 
 ```
 
-
-
 ## Ejercicio 4.8 - Parte 2
 
 ```{r}
@@ -231,8 +214,6 @@ ggplot(actor_por_año, aes(x = releaseYear, y = AvgActors)) +
 
 
 ```
-
-
 
 ## Ejercicio 4.10
 
@@ -258,11 +239,6 @@ ggplot(top_directores, aes(x = reorder(director, voteAvg), y = voteAvg, fill = d
 
 
 ```
-
-
-
-
-
 
 ## Ejercicio 4.12
 
@@ -292,9 +268,6 @@ ggplot(ingresos_por_mes, aes(x = reorder(releaseMonth, AvgRevenue), y = AvgReven
 
 ```
 
-
-
-
 ## Ejercicio 4.14
 
 ```{r}
@@ -313,9 +286,6 @@ ggplot(datos, aes(x = voteAvg, y = revenue)) +
 
 
 ```
-
-
-
 
 ## Ejercicio 4.16
 
@@ -344,7 +314,6 @@ ggplot(datos, aes(x = popularity, y = revenue)) +
 
 ```{r}
 
-
 library(dplyr)
 library(tidyr)
 library(knitr)
@@ -353,8 +322,7 @@ library(kableExtra)
 movies <- read.csv("C:/Users/Usuario/OneDrive/Documentos/Proyecto 1 - Mineria/movies.csv", stringsAsFactors = FALSE)
 
 genre_revenue <- movies %>%
-  movies$genres <- gsub("&#124;", "|", movies$genres)
-  separate_rows(genres, sep = ",") %>%   
+  separate_rows(genres, sep = "\\|") %>%   
   group_by(genres) %>%                 
   summarise(avg_revenue = mean(revenue, na.rm = TRUE)) %>% 
   arrange(desc(avg_revenue)) %>%
@@ -374,11 +342,31 @@ genre_revenue %>%
 
 
 
-
 ## Ejercicio 5.2
 
 ```{r}
 
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+movies <- read.csv("C:/Users/Usuario/OneDrive/Documentos/Proyecto 1 - Mineria/movies.csv", stringsAsFactors = FALSE)
+
+movies <- movies %>%
+  mutate(has_sequel = ifelse(str_detect(title, "\\s*(Part|II|3|4|5|Chapter)\\s*\\d+$"), "Con Secuela", "Sin Secuela"))
+
+comparison <- movies %>%
+  group_by(has_sequel) %>%
+  summarise(avg_revenue = mean(revenue, na.rm = TRUE))
+
+print(comparison)
+
+ggplot(comparison, aes(x = has_sequel, y = avg_revenue, fill = has_sequel)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Comparación de ingresos entre películas con y sin secuelas",
+       x = "Tipo de Película",
+       y = "Ingresos Promedio") +
+  theme_minimal()
 
 
 ```
@@ -389,47 +377,10 @@ genre_revenue %>%
 
 ```{r}
 
+movie_max_actors <- movies %>%
+  filter(actorsAmount == max(actorsAmount, na.rm = TRUE))
+
+movie_max_actors$title
 
 
 ```
-
-
-
-
-
-## Ejercicio 5.4
-
-```{r}
-
-
-
-```
-
-
-
-
-
-
-## Ejercicio 5.5
-
-```{r}
-
-
-
-```
-
-
-
-
-
-## Ejercicio 5.6
-
-```{r}
-
-
-
-```
-
-
-
-
