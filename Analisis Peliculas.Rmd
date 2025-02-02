@@ -15,24 +15,34 @@ install.packages("readr")
 peliculas <- read.csv("movies.csv")
 ```
 
-```{r}
+```{r Análisis cuantitativo y cualtitativo}
 library(ggplot2)
 
 library(ggplot2)
 
-# Lista de variables cuantitativas
+# Variables cualitativas
 quant_vars <- c("budget", "revenue", "runtime", "popularity", "voteAvg", 
                 "voteCount", "genresAmount", "productionCoAmount", 
                 "productionCountriesAmount", "actorsAmount")
 
-# Histograma y Q-Q Plot para cada variable cuantitativa
 for (var in quant_vars) {
   print(ggplot(peliculas, aes_string(x = var)) +
     geom_histogram(bins = 30, fill = "steelblue", color = "black", alpha = 0.7) +
     ggtitle(paste("Histograma de", var)))
 }
 
+# Variables cuantitativas
+# Variables cualitativas a analizar
+qual_vars <- c("video", "originalLanguage")
 
+# Graficar la distribución de cada variable cualitativa
+for (var in qual_vars) {
+  print(ggplot(peliculas, aes_string(x = var)) +
+    geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotar etiquetas
+    ggtitle(paste("Distribución de", var)) +
+    xlab(var) + ylab("Frecuencia"))
+}
 ```
 
 ```{r Top 10 películas con mayor presupuesto}
@@ -168,7 +178,7 @@ revenueData <- c(revenuePage$promedioIngresos, revenueNoPage$promedioIngresos, r
 pie(revenueData, labels = c("Con página", "Sin página", "Con vídeo", "Sin vídeo"), col = rainbow(4))
 ```
 
-```{r}
+```{r Película más antigua}
 library(dplyr)
 library(lubridate)
 peliculas <- peliculas %>%
@@ -177,6 +187,33 @@ peliculas <- peliculas %>%
 peliculas[peliculas$year == min(peliculas$year),c('title', 'budget', 'releaseDate')]
 ```
 
-```{r}
-peliculas[peliculas$revenue == max(peliculas$revenue),c('title', 'budget', 'revenue')]
+```{r Película más taquillera de la historia}
+peliculas[peliculas$revenue == max(peliculas$revenue),c('title', 'budget', 'revenue', 'director', 'releaseDate')]
+```
+
+```{r Top 10 productoras con la mayor cantidad de fracasos}
+library(dplyr)
+library(ggplot2)
+
+peliculas_perdida <- peliculas %>% 
+  filter(revenue < budget & !is.na(productionCompany))
+
+fracasos_por_productora <- peliculas_perdida %>%
+  group_by(productionCompany) %>%
+  summarise(total_perdidas = n()) %>%
+  arrange(desc(total_perdidas)) 
+
+head(fracasos_por_productora, 10)
+
+ggplot(head(fracasos_por_productora, 10), aes(x = reorder(productionCompany, total_perdidas), y = total_perdidas)) +
+  geom_bar(stat = "identity", fill = "red", color = "black") +
+  coord_flip() +
+  labs(title = "Top 10 Productoras con Más Películas en Pérdida",
+       x = "Productora",
+       y = "Cantidad de Películas en Pérdida") +
+  theme_minimal()
+```
+
+```{r Correlación entre ingresos y votos}
+cor(peliculas$revenue, peliculas$voteAvg, use = "complete.obs")
 ```
